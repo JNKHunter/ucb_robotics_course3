@@ -44,10 +44,11 @@ def find_closest_node(graph, qrand):
     return closest_node
 
 
-# RRT with controlled growth and collision checking
-def grow_rrt_with_collision_checking(map, start, goal, Dq, iterations=500):
+# RRT with controlled growth, collision checking, and integer pixel snapping
+def grow_rrt_with_pixel_snapping(map, start, goal, Dq, iterations=2500):
     """
-    Grow an RRT tree with controlled growth and straight-line collision checking.
+    Grow an RRT tree with controlled growth, straight-line collision checking,
+    and snapped nodes to integer pixel coordinates.
 
     Args:
     - map: 2D binary array (0 for obstacles, 255 for free space).
@@ -81,7 +82,10 @@ def grow_rrt_with_collision_checking(map, start, goal, Dq, iterations=500):
 
         # Compute the direction and step toward qrand
         theta = np.arctan2(qrand[0] - qnear[0], qrand[1] - qnear[1])
-        qnew = (qnear[0] + Dq * np.sin(theta), qnear[1] + Dq * np.cos(theta))
+        qnew_float = (qnear[0] + Dq * np.sin(theta), qnear[1] + Dq * np.cos(theta))
+
+        # Snap qnew to the nearest pixel
+        qnew = (round(qnew_float[0]), round(qnew_float[1]))
 
         # Check if qnew is within bounds and if the straight line is obstacle-free
         if 0 <= qnew[0] < map.shape[0] and 0 <= qnew[1] < map.shape[1] and IsPathOpen(map, qnear, qnew):
@@ -109,14 +113,14 @@ def grow_rrt_with_collision_checking(map, start, goal, Dq, iterations=500):
 
 
 # Generate the map with random shapes
-map, labels = random_shapes((200, 300), min_shapes=5, max_shapes=5, num_channels=1)
+map, labels = random_shapes((200, 300), min_shapes=5, max_shapes=20, num_channels=1)
 map = (map == 255).astype(int) * 255  # Convert to binary (255 for free space, 0 for obstacles)
 
 # Test the algorithm
 start = (10, 10)
 goal = (190, 290)
 Dq = 10  # Step size
-G, parent = grow_rrt_with_collision_checking(map, start, goal, Dq)
+G, parent = grow_rrt_with_pixel_snapping(map, start, goal, Dq)
 
 # Reconstruct the path from the parent dictionary
 path = []

@@ -34,10 +34,7 @@ def IsPathOpen(map, a, b):
     plt.show()
     return is_obstacle_free
 
-# Create a simple test map
-#map = np.zeros((200, 300))
-#map[50:150, 100:120] = 1  # Add a vertical obstacle
-
+#Test IsPathOpen
 from skimage.draw import line_nd, random_shapes
 map, labels = random_shapes((200,300),20,5,num_channels=1)
 
